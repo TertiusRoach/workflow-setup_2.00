@@ -11,163 +11,104 @@ const typescript = require('gulp-typescript');
 const replace = require('gulp-string-replace');
 const deletefile = require('gulp-delete-file');
 const sass = require('gulp-sass')(require('sass'));
-const stripCssComments = require('gulp-strip-css-comments');
 const removeHtmlComments = require('gulp-remove-html-comments');
-
-/*
-const compileCode = (callback) => {
-  const distFolder = gulp.dest('dist/');
-  const typesRoot = gulp.dest('types/');
-
-  const typeScriptResult = () => {
-    const typeScriptProject = typescript.createProject('tsconfig.json');
-    const sourceCode = typeScriptProject.src();
-    const initializeSourcemaps = sourcemaps.init();
-    const IdentityMap = sourcemaps.identityMap();
-    return sourceCode.pipe(initializeSourcemaps).pipe(IdentityMap).pipe(typeScriptProject());
-  };
-  const srcUrlMapper = (file) => {
-    return distFolder + file.relative.toString().split('\\').join('/') + '.map';
-  };
-
-  let typeScriptCompiled = typeScriptResult();
-
-  typeScriptCompiled.dts.pipe(typesRoot).on('error', function (err) {
-    console.log('Gulp says: ' + err.message);
-  });
-
-  typeScriptCompiled.js
-    .pipe(
-      sourcemaps
-        .write('./', {
-          includeContent: false,
-          addComment: true, //This "Comment" is the "COMMENT" that the browser uses to reference the file.
-          sourceMappingURL: srcUrlMapper,
-          sourceRoot: '../src',
-        })
-        .pipe(uglify())
-    )
-    .pipe(distFolder);
-
-  callback();
-};
-*/
+//-------------------------------------------------//
 const compileSCSS = (pageName) => {
-  gulp
-    //--| Find the *.scss files |--//
-    .src(`src/front-end/responsive-design.scss`)
-    //--| Pass the *.scss files through the compiler if no errors are detected |--//
-    .pipe(sass().on('error', sass.logError))
-    //--| Save the compiled *.css files into the 'dist' folder |--//
-    .pipe(gulp.dest(`dist/front-end/${pageName}/`));
-
-  //--|▼| Compile all the Sass files in design to CSS and copy to 'dist' folder |▼|--//
-  /*
-  let scssFiles = ['body', 'header', 'main', 'sidebar', 'footer', 'overlay', 'data'];
-  let compile = (item, index, array) => {
-    gulp
-      //--| Find the *.scss files |--//
-      .src(`src/design/scss/${pageName}-${array[index]}.scss`)
-      //--| Pass the *.scss files through the compiler if no errors are detected |--//
-      .pipe(sass().on('error', sass.logError))
-      //--| Save the compiled *.css files into the 'dist' folder |--//
-      .pipe(gulp.dest(`dist/design/css/`));
-  };
-  scssFiles.forEach(compile);
-  */
-  //--|▲| Compile all the Sass files in design to CSS and copy to 'dist' folder |▲|--//
-};
-/*
-const cleanupCSS = (pageName) => {
-  //--|▼| Remove @charset "UTF-8" from *.css files |▼|--//
-  let cleanup = (pageName) => {
-    var cssFiles = ['header', 'main', 'sidebar', 'footer', 'overlay', 'data'];
-    var remove = (item, index, array) => {
-      item = pageName;
-      gulp
-        .src([`dist/design/css/${item}-${array[index]}.css`])
-        .pipe(
-          replace('@charset "UTF-8";', function () {
-            return '';
-          })
-        )
-        .pipe(gulp.dest(`dist/design/css/cleanup/`));
-    };
-    cssFiles.forEach(remove);
-  };
-  setTimeout(cleanup, 10000, pageName);
-  //--|▲| Remove @charset "UTF-8" from *.css files |▲|--//
-};
-const concatCSS = (pageName) => {
+  //--|▼| Concatenate all *.scss files |▼|--//
   let concatenate = (pageName) => {
     gulp
-      //--| Find the *.css files |--//
+      //--| Find all the *.scss files |--//
       .src([
-        `dist/design/css/${pageName}-body.css`,
-        `dist/design/css/cleanup/${pageName}-header.css`,
-        `dist/design/css/cleanup/${pageName}-main.css`,
-        `dist/design/css/cleanup/${pageName}-sidebar.css`,
-        `dist/design/css/cleanup/${pageName}-footer.css`,
-        `dist/design/css/cleanup/${pageName}-overlay.css`,
-        `dist/design/css/cleanup/${pageName}-data.css`,
+        `src/front-end/${pageName}/A-body/**/*.scss`,
+        `src/front-end/${pageName}/B-overlay/**/*.scss`,
+        `src/front-end/${pageName}/C-header/**/*.scss`,
+        `src/front-end/${pageName}/D-footer/**/*.scss`,
+        `src/front-end/${pageName}/E-leftbar/**/*.scss`,
+        `src/front-end/${pageName}/F-rightbar/**/*.scss`,
+        `src/front-end/${pageName}/G-main/**/*.scss`,
+        `src/front-end/${pageName}/H-data/**/*.scss`,
+        'src/front-end/corporate-identity.scss',
+        'src/front-end/responsive-design.scss',
       ])
-      //--| Remove comments from *.css file |--//
-      .pipe(stripCssComments())
-      //--| Name the file you want to contatenate |--//
-      .pipe(concat(`${pageName}-style.css`))
+      //--| Combine the selected *.scss files |--//
+      .pipe(concat('style.scss'))
+      //--| Save the *.scss file inside source folder |--//
+      .pipe(dest(`src/front-end/${pageName}/`));
+  };
+
+  //--|▼| Compile style.scss |▼|--//
+  let compile = (pageName) => {
+    gulp
+      //--| Select style.scss |--//
+      .src([`src/front-end/${pageName}/style.scss`])
+      //--| Convert to file to CSS |--//
+      .pipe(sass().on('error', sass.logError))
+      //--| Compress style.css document |--//
       .pipe(
         uglifycss({
           maxLineLen: 80,
           uglyComments: true,
         })
       )
-      //--| Push the concatenated *.css file into the designated folder |--//
-      .pipe(dest('dist/design/css/'));
+      //--| Distribute CSS file for HTML |--//
+      .pipe(dest(`dist/front-end/${pageName}/`));
   };
-  setTimeout(concatenate, 15000, pageName);
-};
-const deleteCSS = (pageName) => {
-  let erase = (pageName) => {
-    let cssFiles = ['body', 'data', 'footer', 'header', 'main', 'overlay', 'sidebar'];
-    let remove = (item, index, array) => {
-      var regexp = /\w*(\-\w{8}\.js){1}$|\w*(\-\w{8}\.css){1}$/;
-      gulp.src([`dist/design/css/${pageName}-${array[index]}.css`]).pipe(
+
+  //--|▼| Remove style.scss |▼|--//
+  let remove = (pageName) => {
+    gulp
+      .src([`src/front-end/${pageName}/style.scss`])
+      //--| Delete style.scss file using Regex |--//
+      .pipe(
         deletefile({
-          reg: regexp,
+          reg: /\w*(\-\w{8}\.js){1}$|\w*(\-\w{8}\.css){1}$/, //--|◄| Regex: Why are you so confusing? |◄|--//
           deleteMatch: false,
         })
       );
-    };
-    cssFiles.forEach(remove);
-    return gulp.src('dist/design/css/cleanup', { read: false }).pipe(clean());
   };
-  setTimeout(erase, 20000, pageName);
-};
-*/
-const copyHTML = (pageName) => {
-  //--|▼| Copy pageName.html file to 'root' |▼|--//
-  gulp
-    //--| Find *.html reference files in the 'src' folder |--//
-    .src(`src/front-end/${pageName}/${pageName}.html`)
-    .pipe(removeHtmlComments())
-    .pipe(htmlmin({ collapseWhitespace: true }))
-    //--| Copy the pageName.html into 'root' folder |--//
-    .pipe(gulp.dest(`dist/../`));
-  //--|▲| Copy pageName.html file to 'root' |▲|--//
-};
 
+  //--|▼| Execute functions asynchronously |▼|--//
+  setTimeout(concatenate, 0000, pageName);
+  setTimeout(compile, 1000, pageName);
+  setTimeout(remove, 2000, pageName);
+};
+const copyHTML = (pageName) => {
+  let sourceFolders = ['A-body', 'B-overlay', 'C-header', 'D-footer', 'E-leftbar', 'F-rightbar', 'G-main', 'H-data'];
+  //--|▼| Copy all HTML files into distributable folder |▼|--//
+  let copyHTML = (item, index, array) => {
+    gulp
+      //--| Find *.html files in the source folder |--//
+      .src(`src/front-end/${pageName}/${array[index]}/**/*.html`)
+      .pipe(removeHtmlComments())
+      .pipe(htmlmin({ collapseWhitespace: true }))
+      //--| Copy the *.html files into distribution folder |--//
+      .pipe(gulp.dest(`dist/front-end/${pageName}/${array[index].substring(2, array[index].length)}/`));
+  };
+  sourceFolders.forEach(copyHTML);
+  //--|▲| Copy all HTML files into distributable folder |▲|--//
+  //--|▼| Copy pageName.html file into root folder |▼|--//
+  let copyPage = (pageName) => {
+    gulp
+      //--| Find *.html reference files in the 'src' folder |--//
+      .src(`src/front-end/${pageName}/${pageName}.html`)
+      .pipe(removeHtmlComments())
+      .pipe(htmlmin({ collapseWhitespace: true }))
+      //--| Copy the pageName.html into 'root' folder |--//
+      .pipe(gulp.dest('dist/../'));
+  };
+  setTimeout(copyPage, 1000, pageName);
+  //--|▲| Copy pageName.html file into root folder |▲|--//
+};
+//-------------------------------------------------//
+
+//-------------------------------------------------//
 gulp.task('copyIndex', async (callback) => {
   let pageName = 'index';
 
-  compileSCSS(pageName);
   copyHTML(pageName);
-  // compileCode(callback);
-
-  // cleanupCSS(pageName);
-  // concatCSS(pageName);
-  // deleteCSS(pageName);
+  compileSCSS(pageName);
 });
-
+//-------------------------------------------------//
 gulp.task('backupDependencies', async () => {
   //--|▼| Copy images to 'dist' folder |▼|--//
   gulp
