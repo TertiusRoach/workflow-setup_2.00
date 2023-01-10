@@ -29,8 +29,8 @@ const copyHTML = (pageName) => {
     //--| Copy the pageName.html into 'root' folder |--//
     .pipe(gulp.dest('dist/../'));
 
-  let sourceFolders = ['A-body', 'B-overlay', 'C-header', 'D-footer', 'E-leftbar', 'F-rightbar', 'G-main', 'H-data'];
   //--|▼| Copy all HTML files into distributable folder |▼|--//
+  let sourceFolders = ['A-body', 'B-overlay', 'C-header', 'D-footer', 'E-leftbar', 'F-rightbar', 'G-main', 'H-data'];
   let copyHTML = (item, index, array) => {
     gulp
       //--| Find *.html files in the source folder |--//
@@ -101,44 +101,72 @@ const compileSCSS = (pageName) => {
   setTimeout(compile, 1000, pageName);
   setTimeout(remove, 2000, pageName);
 };
-const compileTypes = (callback) => {
+const compileTypes = (callback, pageName) => {
   const distFolder = gulp.dest('dist/');
   const typesFolder = gulp.dest('types/');
 
-  //--|▼| Reference 'tsconfig.json' |▼|--//
-  const typeScriptResult = () => {
-    const typeScriptProject = typescript.createProject('tsconfig.json');
-    const sourceCode = typeScriptProject.src();
-    const initializeSourcemaps = sourcemaps.init();
-    const IdentityMap = sourcemaps.identityMap();
-    return sourceCode.pipe(initializeSourcemaps).pipe(IdentityMap).pipe(typeScriptProject());
-  };
-
-  //--|▼| Compile TypeScript |▼|--//
+  //--|▼| Map out TypeScript code |▼|--//
   const srcUrlMapper = (file) => {
     return distFolder + file.relative.toString().split('\\').join('/') + '.map';
   };
 
-  //--|▼| Types folder created here |▼|--//
-  let typeScriptCompiled = typeScriptResult();
-  typeScriptCompiled.dts.pipe(typesFolder).on('error', function (err) {
-    console.log('Gulp says: ' + err.message);
-  });
+  //--|▼| Build reference map for compiler |▼|--//
+  const reference = () => {
+    //--|▼| Reference 'tsconfig.json' |▼|--//
+    const typeScriptProject = typescript.createProject('tsconfig.json');
+    //--|▼| Get TypeScript source code |▼|--//
+    const sourceCode = typeScriptProject.src();
+    //--|▼| Initialise TypeScript map for export |▼|--//
+    const initializeSourcemaps = sourcemaps.init();
+    //--|▼| Give source files its JavaScript identity |▼|--//
+    const IdentityMap = sourcemaps.identityMap();
+    //--|▼| Return code for compiling |▼|--//
+    return sourceCode.pipe(initializeSourcemaps).pipe(IdentityMap).pipe(typeScriptProject());
+  };
 
-  typeScriptCompiled.js
-    .pipe(
-      sourcemaps
-        .write('./', {
-          includeContent: false,
-          addComment: true, //This "Comment" is the "COMMENT" that the browser uses to reference the file.
-          sourceMappingURL: srcUrlMapper,
-          sourceRoot: '../src',
-        })
-        .pipe(uglify())
-    )
-    .pipe(dest('dist/'));
+  //--|▼| Compile TypeScript |▼|--//
+  let compileTypes = () => {
+    let typeScriptCompiled = reference();
+    typeScriptCompiled.dts.pipe(typesFolder).on('error', function (err) {
+      console.log('Gulp says: ' + err.message);
+    });
+
+    typeScriptCompiled.js
+      .pipe(
+        sourcemaps
+          .write('./', {
+            includeContent: false,
+            addComment: true, //This "Comment" is the "COMMENT" that the browser uses to reference the file.
+            sourceMappingURL: srcUrlMapper,
+            sourceRoot: '../src',
+          })
+          .pipe(uglify())
+      )
+      .pipe(dest('dist/'));
+  };
+  setTimeout(compileTypes, 1000);
 
   callback();
+
+  //--|▼| Copy front-end pages |▼|--//
+  let copyFront = (pageName) => {
+    let frontFolders = ['A-body', 'B-overlay', 'C-header', 'D-footer', 'E-leftbar', 'F-rightbar', 'G-main', 'H-data'];
+    for (let i = 0; i < frontFolders.length; i++) {
+      gulp
+        //--| Find the *.js file |--//
+        .src(`dist/front-end/${pageName}/${frontFolders[i]}/**/*`)
+        //--| Set Destination |--//
+        .pipe(gulp.dest(`dist/front-end/${pageName}/${frontFolders[i].split('-')[1]}/`));
+    }
+  };
+  setTimeout(copyFront, 2000, pageName);
+
+  /*
+  let testTwo = () => {
+    return del('dist/front-end/index/**', {force:true});
+  };
+  setTimeout(testTwo, 3000);
+  */
 };
 
 //-------------------------------------------------//
@@ -146,7 +174,7 @@ gulp.task('copyIndex', async (callback) => {
   let pageName = 'index';
   copyHTML(pageName);
   compileSCSS(pageName);
-  compileTypes(callback);
+  compileTypes(callback, pageName);
 });
 gulp.task('backupDependencies', async () => {
   //--|▼| Copy images to 'dist' folder |▼|--//
