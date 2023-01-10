@@ -1,7 +1,8 @@
 {
   "compileOnSave": true,
-  "exclude": ["dist/**/*", "gulpfile/**/*"],
-  "include": ["src/**/*", "typings/**/*.d.ts", "dist/test.js", "gulpfile.js"],
+  // "exclude": ["dist/**/*", "gulpfile/**/*"],
+  "exclude": [],
+  "include": ["src/back-end/**/**/**/*.ts", "src/front-end/**/**/**/*.ts"],
   "compilerOptions": {
     "baseUrl": "src",
     "rootDir": "src",

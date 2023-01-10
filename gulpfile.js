@@ -12,7 +12,36 @@ const replace = require('gulp-string-replace');
 const deletefile = require('gulp-delete-file');
 const sass = require('gulp-sass')(require('sass'));
 const removeHtmlComments = require('gulp-remove-html-comments');
-//-------------------------------------------------//
+
+//----------------------------------------//
+
+//----------------------------------------//
+
+const copyHTML = (pageName) => {
+  //--|▼| Copy main HTML file into root folder |▼|--//
+  gulp
+    //--| Find *.html reference files in the 'src' folder |--//
+    .src(`src/front-end/${pageName}/${pageName}.html`)
+    //--| Clear comments from HTML file |--//
+    .pipe(removeHtmlComments())
+    //--|Compress HTML file |--//
+    .pipe(htmlmin({ collapseWhitespace: true }))
+    //--| Copy the pageName.html into 'root' folder |--//
+    .pipe(gulp.dest('dist/../'));
+
+  let sourceFolders = ['A-body', 'B-overlay', 'C-header', 'D-footer', 'E-leftbar', 'F-rightbar', 'G-main', 'H-data'];
+  //--|▼| Copy all HTML files into distributable folder |▼|--//
+  let copyHTML = (item, index, array) => {
+    gulp
+      //--| Find *.html files in the source folder |--//
+      .src(`src/front-end/${pageName}/${array[index]}/**/*.html`)
+      .pipe(removeHtmlComments())
+      .pipe(htmlmin({ collapseWhitespace: true }))
+      //--| Copy the *.html files into distribution folder |--//
+      .pipe(gulp.dest(`dist/front-end/${pageName}/${array[index]}/`));
+  };
+  sourceFolders.forEach(copyHTML);
+};
 const compileSCSS = (pageName) => {
   //--|▼| Concatenate all *.scss files |▼|--//
   let concatenate = (pageName) => {
@@ -72,43 +101,53 @@ const compileSCSS = (pageName) => {
   setTimeout(compile, 1000, pageName);
   setTimeout(remove, 2000, pageName);
 };
-const copyHTML = (pageName) => {
-  let sourceFolders = ['A-body', 'B-overlay', 'C-header', 'D-footer', 'E-leftbar', 'F-rightbar', 'G-main', 'H-data'];
-  //--|▼| Copy all HTML files into distributable folder |▼|--//
-  let copyHTML = (item, index, array) => {
-    gulp
-      //--| Find *.html files in the source folder |--//
-      .src(`src/front-end/${pageName}/${array[index]}/**/*.html`)
-      .pipe(removeHtmlComments())
-      .pipe(htmlmin({ collapseWhitespace: true }))
-      //--| Copy the *.html files into distribution folder |--//
-      .pipe(gulp.dest(`dist/front-end/${pageName}/${array[index].substring(2, array[index].length)}/`));
+const compileTypes = (callback) => {
+  const distFolder = gulp.dest('dist/');
+  const typesFolder = gulp.dest('types/');
+
+  //--|▼| Reference 'tsconfig.json' |▼|--//
+  const typeScriptResult = () => {
+    const typeScriptProject = typescript.createProject('tsconfig.json');
+    const sourceCode = typeScriptProject.src();
+    const initializeSourcemaps = sourcemaps.init();
+    const IdentityMap = sourcemaps.identityMap();
+    return sourceCode.pipe(initializeSourcemaps).pipe(IdentityMap).pipe(typeScriptProject());
   };
-  sourceFolders.forEach(copyHTML);
-  //--|▲| Copy all HTML files into distributable folder |▲|--//
-  //--|▼| Copy pageName.html file into root folder |▼|--//
-  let copyPage = (pageName) => {
-    gulp
-      //--| Find *.html reference files in the 'src' folder |--//
-      .src(`src/front-end/${pageName}/${pageName}.html`)
-      .pipe(removeHtmlComments())
-      .pipe(htmlmin({ collapseWhitespace: true }))
-      //--| Copy the pageName.html into 'root' folder |--//
-      .pipe(gulp.dest('dist/../'));
+
+  //--|▼| Compile TypeScript |▼|--//
+  const srcUrlMapper = (file) => {
+    return distFolder + file.relative.toString().split('\\').join('/') + '.map';
   };
-  setTimeout(copyPage, 1000, pageName);
-  //--|▲| Copy pageName.html file into root folder |▲|--//
+
+  //--|▼| Types folder created here |▼|--//
+  let typeScriptCompiled = typeScriptResult();
+  typeScriptCompiled.dts.pipe(typesFolder).on('error', function (err) {
+    console.log('Gulp says: ' + err.message);
+  });
+
+  typeScriptCompiled.js
+    .pipe(
+      sourcemaps
+        .write('./', {
+          includeContent: false,
+          addComment: true, //This "Comment" is the "COMMENT" that the browser uses to reference the file.
+          sourceMappingURL: srcUrlMapper,
+          sourceRoot: '../src',
+        })
+        .pipe(uglify())
+    )
+    .pipe(dest('dist/'));
+
+  callback();
 };
-//-------------------------------------------------//
 
 //-------------------------------------------------//
 gulp.task('copyIndex', async (callback) => {
   let pageName = 'index';
-
   copyHTML(pageName);
   compileSCSS(pageName);
+  compileTypes(callback);
 });
-//-------------------------------------------------//
 gulp.task('backupDependencies', async () => {
   //--|▼| Copy images to 'dist' folder |▼|--//
   gulp
@@ -133,3 +172,13 @@ gulp.task('backupDependencies', async () => {
     .pipe(gulp.dest('dist/'));
   //--|▲| Copy Require.js to 'dist' folder |▲|--//
 });
+//-------------------------------------------------//
+
+/*
+gulp.task('compileBack', async (callback) => {
+  let pageName = 'index';
+});
+gulp.task('compileFront', async (callback) => {
+  let pageName = 'index';
+});
+*/

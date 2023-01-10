@@ -42,8 +42,6 @@ Maintaining projects shouldn't be hard when it becomes big. Yeah, I'm figuring o
 
 ---
 
-## Extra Gulp installs (Testing)
-
 ## AWS & MySQL (Setup)
 
 [Reference One](https://www.youtube.com/watch?v=6Nt-Jl3CzxE)
