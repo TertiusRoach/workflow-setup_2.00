@@ -184,6 +184,7 @@ const compileTypes = (pageName) => {
 //-------------------------------------------------//
 gulp.task('copyIndex', async () => {
   let pageName = 'index';
+
   copyHTML(pageName);
   compileSCSS(pageName);
   compileTypes(pageName);
