@@ -101,7 +101,7 @@ const compileSCSS = (pageName) => {
   setTimeout(compile, 1000, pageName);
   setTimeout(remove, 2000, pageName);
 };
-const compileTypes = (pageName) => {
+const compileCode = (pageName) => {
   //--|▼| Map out TypeScript to dist folder |▼|--//
   let srcUrlMapper = (file) => {
     let distFolder = gulp.dest('dist/');
@@ -187,7 +187,7 @@ gulp.task('copyIndex', async () => {
 
   copyHTML(pageName);
   compileSCSS(pageName);
-  compileTypes(pageName);
+  compileCode(pageName);
 });
 gulp.task('backupDependencies', async () => {
   //--|▼| Copy images to 'dist' folder |▼|--//
