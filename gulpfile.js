@@ -101,12 +101,10 @@ const compileSCSS = (pageName) => {
   setTimeout(compile, 1000, pageName);
   setTimeout(remove, 2000, pageName);
 };
-const compileTypes = (callback, pageName) => {
-  const distFolder = gulp.dest('dist/');
-  const typesFolder = gulp.dest('types/');
-
-  //--|▼| Map out TypeScript code |▼|--//
-  const srcUrlMapper = (file) => {
+const compileTypes = (pageName) => {
+  //--|▼| Map out TypeScript to dist folder |▼|--//
+  let srcUrlMapper = (file) => {
+    let distFolder = gulp.dest('dist/');
     return distFolder + file.relative.toString().split('\\').join('/') + '.map';
   };
 
@@ -126,6 +124,7 @@ const compileTypes = (callback, pageName) => {
 
   //--|▼| Compile TypeScript |▼|--//
   let compileTypes = () => {
+    let typesFolder = gulp.dest('types/');
     let typeScriptCompiled = reference();
     typeScriptCompiled.dts.pipe(typesFolder).on('error', function (err) {
       console.log('Gulp says: ' + err.message);
@@ -144,9 +143,6 @@ const compileTypes = (callback, pageName) => {
       )
       .pipe(dest('dist/'));
   };
-  setTimeout(compileTypes, 1000);
-
-  callback();
 
   //--|▼| Copy front-end pages |▼|--//
   let copyFront = (pageName) => {
@@ -159,22 +155,38 @@ const compileTypes = (callback, pageName) => {
         .pipe(gulp.dest(`dist/front-end/${pageName}/${frontFolders[i].split('-')[1]}/`));
     }
   };
-  setTimeout(copyFront, 2000, pageName);
 
-  /*
-  let testTwo = () => {
-    return del('dist/front-end/index/**', {force:true});
+  //--|▼| Delete front-end clutter |▼|--//
+  let cleanFront = (pageName) => {
+    return gulp
+      .src(
+        [
+          `dist/front-end/${pageName}/A-body`,
+          `dist/front-end/${pageName}/B-overlay`,
+          `dist/front-end/${pageName}/C-header`,
+          `dist/front-end/${pageName}/D-footer`,
+          `dist/front-end/${pageName}/E-leftbar`,
+          `dist/front-end/${pageName}/F-rightbar`,
+          `dist/front-end/${pageName}/G-main`,
+          `dist/front-end/${pageName}/H-data`,
+        ],
+        { read: false }
+      )
+      .pipe(clean());
   };
-  setTimeout(testTwo, 3000);
-  */
+
+  //--|▼| Execute functions asynchronously |▼|--//
+  setTimeout(compileTypes, 1000);
+  setTimeout(copyFront, 2000, pageName);
+  setTimeout(cleanFront, 3000, pageName);
 };
 
 //-------------------------------------------------//
-gulp.task('copyIndex', async (callback) => {
+gulp.task('copyIndex', async () => {
   let pageName = 'index';
   copyHTML(pageName);
   compileSCSS(pageName);
-  compileTypes(callback, pageName);
+  compileTypes(pageName);
 });
 gulp.task('backupDependencies', async () => {
   //--|▼| Copy images to 'dist' folder |▼|--//

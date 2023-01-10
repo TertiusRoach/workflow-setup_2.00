@@ -1,3 +1,4 @@
+console.log('--index.js Loaded');
 /*
 import { Administrasie } from './code/administrasie';
 import { Operasioneel } from './code/operasioneel';
