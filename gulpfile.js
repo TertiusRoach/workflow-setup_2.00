@@ -176,9 +176,9 @@ const compileCode = (pageName) => {
   };
 
   //--|▼| Execute functions asynchronously |▼|--//
-  setTimeout(compileTypes, 1000);
-  setTimeout(copyFront, 2000, pageName);
-  setTimeout(cleanFront, 3000, pageName);
+  setTimeout(compileTypes, 0000);
+  setTimeout(copyFront, 5000, pageName);
+  setTimeout(cleanFront, 10000, pageName);
 };
 
 //-------------------------------------------------//
