@@ -98,15 +98,17 @@ const compileSCSS = (pageName) => {
 
   //--|▼| Execute functions asynchronously |▼|--//
   setTimeout(concatenate, 0000, pageName);
-  setTimeout(compile, 1000, pageName);
-  setTimeout(remove, 2000, pageName);
+  setTimeout(compile, 5000, pageName);
+  setTimeout(remove, 10000, pageName);
 };
 const compileCode = (pageName) => {
-  //--|▼| Map out TypeScript to dist folder |▼|--//
-  let srcUrlMapper = (file) => {
-    let distFolder = gulp.dest('dist/');
-    return distFolder + file.relative.toString().split('\\').join('/') + '.map';
-  };
+  //--|▼| Copy RequireJS to 'dist' folder |▼|--//
+  gulp
+    //--| Find the *.js file |--//
+    .src('src/main.js')
+    .pipe(uglify())
+    //--| Set Destination |--//
+    .pipe(gulp.dest('dist/'));
 
   //--|▼| Build reference map for compiler |▼|--//
   const reference = () => {
@@ -122,10 +124,17 @@ const compileCode = (pageName) => {
     return sourceCode.pipe(initializeSourcemaps).pipe(IdentityMap).pipe(typeScriptProject());
   };
 
+  //--|▼| Map out TypeScript to dist folder |▼|--//
+  let srcUrlMapper = (file) => {
+    let distFolder = gulp.dest('dist/');
+    return distFolder + file.relative.toString().split('\\').join('/') + '.map';
+  };
+
   //--|▼| Compile TypeScript |▼|--//
   let compileTypes = () => {
     let typesFolder = gulp.dest('types/');
     let typeScriptCompiled = reference();
+
     typeScriptCompiled.dts.pipe(typesFolder).on('error', function (err) {
       console.log('Gulp says: ' + err.message);
     });
@@ -196,22 +205,13 @@ gulp.task('backupDependencies', async () => {
     .src('src/images/**/*')
     //--| Set Destination |--//
     .pipe(gulp.dest('dist/images/'));
-  //--|▲| Copy images to 'dist' folder |▲|--//
+
   //--|▼| Copy vendors to 'dist' folder |▼|--//
   gulp
     //--| Find the *.js file |--//
     .src('src/vendors/**/*')
     //--| Set Destination |--//
     .pipe(gulp.dest('dist/vendors/'));
-  //--|▲| Copy vendors to 'dist' folder |▲|--//
-  //--|▼| Copy RequireJS to 'dist' folder |▼|--//
-  gulp
-    //--| Find the *.js file |--//
-    .src('src/config.js')
-    .pipe(uglify())
-    //--| Set Destination |--//
-    .pipe(gulp.dest('dist/'));
-  //--|▲| Copy Require.js to 'dist' folder |▲|--//
 });
 //-------------------------------------------------//
 

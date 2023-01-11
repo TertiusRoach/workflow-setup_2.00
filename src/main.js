@@ -1,4 +1,13 @@
-console.log('--index.js Loaded');
+//--|►| RequireJS (Workflow Setup) |◄|--//
+require(['main'], () => {
+  let fontAwesomePro = 'dist/vendors/font-awesome/js/all.min.js'; //--|◄| Font Awesome Pro (5.13.0) |◄|--//
+  let jQuery = 'https://code.jquery.com/jquery-3.6.0.min.js'; //--|◄| jQuery (3.6.0) |◄|--//
+  let main = 'dist/front-end/index/index.js';
+
+  require([fontAwesomePro, jQuery, main]);
+  //--► console.log('--main.js Loaded'); ◄--//
+});
+
 /*
 import { Administrasie } from './code/administrasie';
 import { Operasioneel } from './code/operasioneel';
