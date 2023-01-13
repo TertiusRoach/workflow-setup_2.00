@@ -13,10 +13,6 @@ const deletefile = require('gulp-delete-file');
 const sass = require('gulp-sass')(require('sass'));
 const removeHtmlComments = require('gulp-remove-html-comments');
 
-//----------------------------------------//
-
-//----------------------------------------//
-
 const copyHTML = (pageName) => {
   //--|▼| Copy main HTML file into root folder |▼|--//
   gulp
