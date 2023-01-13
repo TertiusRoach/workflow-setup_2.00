@@ -71,7 +71,7 @@ const compileSCSS = (pageName) => {
       //--| Compress style.css document |--//
       .pipe(
         uglifycss({
-          maxLineLen: 80,
+          maxLineLen: 1000,
           uglyComments: true,
         })
       )
