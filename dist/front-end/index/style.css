@@ -1,9 +1,8 @@
 @charset "UTF-8";*{font-family:"Baloo Bhai 2",arial}
-.default-body{color:red}.default-body div{background-color:darkred}.login-body{color:blue}
-*{z-index:999}.default-overlay{color:green}.test-overlay{color:purple}.default-header{color:yellow}
-.default-footer{color:turquoise}.default-leftbar{color:maroon}.default-rightbar{color:brown}
-.default-main{color:black}.default-data{color:white}*{padding:0;margin:0}body{height:100vh}
-@media only screen and (orientation:landscape) and (min-height:240px){body{grid-template-columns:1fr repeat(26,13.3333333333px) 1fr;grid-template-rows:40px repeat(12,1fr) 40px}
+.default-body{background-color:red}.login-body{background-color:#421110}.default-overlay{color:green}
+.default-header{color:yellow}.default-footer{color:turquoise}.default-leftbar{color:maroon}
+.default-rightbar{color:brown}.default-main{color:black}.default-data{color:white}
+*{padding:0;margin:0}body{height:100vh}@media only screen and (orientation:landscape) and (min-height:240px){body{grid-template-columns:1fr repeat(26,13.3333333333px) 1fr;grid-template-rows:40px repeat(12,1fr) 40px}
 }@media only screen and (orientation:landscape) and (min-height:241px){body{grid-template-columns:1fr repeat(26,13.4166666667px) 1fr;grid-template-rows:40px repeat(12,1fr) 40px}
 }@media only screen and (orientation:landscape) and (min-height:242px){body{grid-template-columns:1fr repeat(26,13.5px) 1fr;grid-template-rows:40px repeat(12,1fr) 40px}
 }@media only screen and (orientation:landscape) and (min-height:243px){body{grid-template-columns:1fr repeat(26,13.5833333333px) 1fr;grid-template-rows:40px repeat(12,1fr) 40px}
