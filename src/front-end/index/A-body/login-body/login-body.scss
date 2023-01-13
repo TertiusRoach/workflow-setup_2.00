@@ -10,4 +10,10 @@ $secondary-light: #c8c0c0; //--► rgba(99, 27, 25, 0.6) ◄--//
 
 .login-body {
   background-color: $secondary-dark;
+  //--▼ Desktop (Landscape) ▼--//
+  @media screen and (orientation: landscape) {
+  }
+  //--▼ Mobile (Portrait) ▼--//
+  @media screen and (orientation: portrait) {
+  }
 }
