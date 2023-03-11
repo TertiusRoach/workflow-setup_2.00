@@ -20,7 +20,7 @@ const copyHTML = (pageName) => {
     .src(`src/front-end/${pageName}/${pageName}.html`)
     //--| Clear comments from HTML file |--//
     .pipe(removeHtmlComments())
-    //--|Compress HTML file |--//
+    //--| Compress HTML file |--//
     .pipe(htmlmin({ collapseWhitespace: true }))
     //--| Copy the pageName.html into 'root' folder |--//
     .pipe(gulp.dest('dist/../'));
@@ -44,6 +44,7 @@ const compileSCSS = (pageName) => {
     gulp
       //--| Find all the *.scss files |--//
       .src([
+        'src/front-end/corporate-identity.scss',
         `src/front-end/${pageName}/A-body/**/*.scss`,
         `src/front-end/${pageName}/B-overlay/**/*.scss`,
         `src/front-end/${pageName}/C-header/**/*.scss`,
@@ -52,7 +53,6 @@ const compileSCSS = (pageName) => {
         `src/front-end/${pageName}/F-rightbar/**/*.scss`,
         `src/front-end/${pageName}/G-main/**/*.scss`,
         `src/front-end/${pageName}/H-data/**/*.scss`,
-        'src/front-end/corporate-identity.scss',
         'src/front-end/responsive-design.scss',
       ])
       //--| Combine the selected *.scss files |--//
@@ -140,7 +140,7 @@ const compileCode = (pageName) => {
         sourcemaps
           .write('./', {
             includeContent: false,
-            addComment: true, //This "Comment" is the "COMMENT" that the browser uses to reference the file.
+            addComment: true,
             sourceMappingURL: srcUrlMapper,
             sourceRoot: '../src',
           })
@@ -154,14 +154,22 @@ const compileCode = (pageName) => {
     let frontFolders = ['A-body', 'B-overlay', 'C-header', 'D-footer', 'E-leftbar', 'F-rightbar', 'G-main', 'H-data'];
     for (let i = 0; i < frontFolders.length; i++) {
       gulp
-        //--| Find the *.js file |--//
+        //--| Find all files and folders |--//
         .src(`dist/front-end/${pageName}/${frontFolders[i]}/**/*`)
         //--| Set Destination |--//
         .pipe(gulp.dest(`dist/front-end/${pageName}/${frontFolders[i].split('-')[1]}/`));
+
+      /*
+      gulp
+        //--| Find import-*.js for each block |--//
+        .src(`dist/front-end/${pageName}/${frontFolders[i]}/import-${frontFolders[i].split('-')[1]}.js`)
+        //--| Set Destination |--//
+        .pipe(gulp.dest(`dist/front-end/${pageName}/${frontFolders[i].split('-')[1]}/`));
+      */
     }
   };
 
-  //--|▼| Delete front-end clutter |▼|--//
+  //--|▼| Delete sorted front-end clutter |▼|--//
   let cleanFront = (pageName) => {
     return gulp
       .src(
@@ -180,10 +188,11 @@ const compileCode = (pageName) => {
       .pipe(clean());
   };
 
+  compileTypes();
   //--|▼| Execute functions asynchronously |▼|--//
-  setTimeout(compileTypes, 0000);
-  setTimeout(copyFront, 5000, pageName);
-  setTimeout(cleanFront, 10000, pageName);
+  /* setTimeout(compileTypes, 0000); */
+  /* setTimeout(copyFront, 5000, pageName); */
+  /* setTimeout(cleanFront, 10000, pageName); */
 };
 
 //-------------------------------------------------//
